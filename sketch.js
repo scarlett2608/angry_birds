@@ -92,3 +92,8 @@ function mouseReleased(){
 
 }
 
+function keyPressed () {
+  if (keyCode === 32) {
+    slingShot.attach(bird1.body);
+  }
+}
