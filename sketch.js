@@ -9,19 +9,23 @@ var engine,world;
 var box1,ground,box2,box3,box4,box5;
 var pig1,pig2,log1,log2,log3,log4;
 var bird1;
-var background_img;
+var bg = 'sprites/bg.png';
 var constrained_log;
 var platform;
+var gameState = 'onSling';
+var background_img;
+var score = 0;
+
 
 function preload(){
 
-  background_img = loadImage('sprites/bg.png');
+  getBackgroundImg();
 
 }
 
 function setup() {
   //canvas
-  var canvas =createCanvas(1200,400);
+  var canvas = createCanvas(1200,400);
   //engine
   engine =  Engine.create();
   world = engine.world;
@@ -49,11 +53,19 @@ function setup() {
 }
 
 function draw() {
-  //background colour
-  background(background_img);  
+  if (background_img) {
+    //background colour
+  background(background_img);
+  }
+
+  noStroke();
+  textSize(35);
+  fill('white');
+  text('Score: '+ score,width-300,50);
+    
 
   Engine.update(engine);
-  
+
   //displaying objects
     //ground
     ground.display();
@@ -66,7 +78,9 @@ function draw() {
     box5.display();
     //pigies
     pig1.display();
+    pig1.score();
     pig2.display();
+    pig2.score();
     //logs
     log1.display();
     log2.display();
@@ -83,17 +97,41 @@ function draw() {
 }
 
 function mouseDragged(){
-  Matter.Body.setPosition(bird1.body,{x:mouseX,y:mouseY})
-
+  if (gameState !== 'launched') {
+   Matter.Body.setPosition(bird1.body,{x:mouseX,y:mouseY})
+  }
 }
 
 function mouseReleased(){
+  
   slingShot.fly()
+  gameState = 'launched';
 
 }
 
 function keyPressed () {
-  if (keyCode === 32) {
+  if (keyCode === 32 && bird1.body.speed < 1) {
+    bird1.trajectory = [];
+    Matter.Body.setPosition(bird1.body,{x:200,y:50});
     slingShot.attach(bird1.body);
+    gameState = 'onSling';
   }
+
+}
+
+async function getBackgroundImg (){
+  
+  var responce = await fetch('http://worldtimeapi.org/api/timezone/Asia/Kolkata');
+  var responceJSON = await responce.json();
+  var datetime = responceJSON.datetime;
+  var hour = datetime.slice(11,13);
+  if (hour >= 06 && hour <= 19) {
+    bg = 'sprites/bg.png';
+  }
+
+  else{
+    bg = 'sprites/bg2.jpg';
+  }
+  background_img = loadImage(bg);
+
 }
